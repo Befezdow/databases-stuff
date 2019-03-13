@@ -1,0 +1,47 @@
+//students (with environment) who passed ryazanceva's subjects on 5
+match (teacher:Teacher {lastname: 'Ryazanceva'})-[:TEACHES]->(subject)<-[:PASSED {mark: 5}]-(student:Student)
+return teacher, subject, student
+
+//students (with environment) who passed ryazanceva's subjects on 3
+match (teacher:Teacher {lastname: 'Ryazanceva'})-[:TEACHES]->(subject)<-[:PASSED {mark: 3}]-(student:Student)
+return teacher, subject, student
+
+//students who passed UMF and study in 16-am
+match (subject:Subject {name: 'UMF'})<-[:PASSED]-(student:Student)-[:STUDIES_IN]->(group:Group {name: '16-AM'})
+return student
+
+//teachers without students for directing
+match (teacher:Teacher) 
+where not (teacher)-[:DIRECTS]->(:Student) 
+return teacher
+
+//The teacher with the largest number of students for directing
+match (teacher:Teacher) 
+with teacher, size((teacher)-[:DIRECTS]->(:Student)) as students_count 
+return teacher, students_count
+order by students_count desc 
+limit 1
+
+//teachers with their students for directing
+match (teacher:Teacher) 
+with teacher, size((teacher)-[:DIRECTS]->(:Student)) as students_count 
+return teacher.lastname, students_count
+order by students_count desc
+
+//The teacher who teaches informatics and don't have students for directing
+match (teacher:Teacher)-[:TEACHES]->(subject:Subject {name:'Informatics'}) 
+where not (teacher)-[:DIRECTS]->(:Student) 
+return teacher
+
+//teachers of Dogin
+match (teacher:Teacher) 
+where (:Student {lastname:'Dogin'})-[:STUDIES_IN]->()-[:STUDIES {teacher: teacher.lastname}]->() 
+return teacher
+
+//teacher with lastname witch starts with K
+match (teacher:Teacher) where teacher.lastname=~'K.*' return teacher
+
+//students who passed 16-am's subjects and didn't pass 15-am's subjects
+match (student:Student) 
+where ((student)-[:PASSED]->(:Subject)<-[:STUDIES]-(:Group {name:'16-AM'})) and not ((student)-[:PASSED]->(:Subject)<-[:STUDIES]-(:Group {name:'15-AM'}))
+return student
